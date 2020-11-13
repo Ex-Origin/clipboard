@@ -1,0 +1,15 @@
+#ifndef CLIPBOARD_CONFIG_H
+#define CLIPBOARD_CONFIG_H
+
+#define SERVER_PORT 1056
+#define MAX_CONNECTION 16
+
+#define DEBUG
+
+#define SERVER_IP "192.168.1.108"
+#define HELLO "HELLO"
+
+#define CIRCLE_LOOP_TIME 10
+#define TIMEOUT 20
+
+#endif
