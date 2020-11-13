@@ -195,9 +195,40 @@ int main(int argc, char **argv)
     struct timeval timeout;
     struct epoll_event event, events[MAX_EVENT];
     int epoll_fd;
+    struct hostent *gethost = NULL;
+    char ch;
+    int sign_p = 0, sign_h = 0;
+    char *host;
+    unsigned int port;
 
     // Keep loop while
     int run;
+
+    host = SERVER_IP;
+    port = SERVER_PORT;
+    while ((ch = getopt(argc, argv, "p:h:")) != -1)
+    {
+        switch (ch)
+        {
+        case 'p':
+            sign_p = 1;
+            port = atoi(optarg);
+            break;
+        case 'h':
+            sign_h = 1;
+            host = optarg;
+            break;
+
+        default:
+            printf("Usage: %s [-h host] [-p port]\n"
+                   "	Command Summary:\n"
+                   "		-h host		Specify host of remote connects\n"
+                   "		-p port		Specify port for remote connects\n",
+                   argv[0]);
+            exit(EXIT_SUCCESS);
+            break;
+        }
+    }
 
     sem_init(&new_sem, 0, 1);
     sem_init(&old_sem, 0, 1);
@@ -230,12 +261,10 @@ int main(int argc, char **argv)
 
     } while (crypto_rsa_exptmod(local_buf, mod_len, text, &text_len, global_public_key_ptr, 0) != 0);
 
-    remote_addr.sin_family = AF_INET;
-#ifdef SERVER_IP
-    remote_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
-#else
-#endif
-    remote_addr.sin_port = htons(SERVER_PORT);
+    gethost = gethostbyname(host);
+    remote_addr.sin_family = gethost->h_addrtype;
+    remote_addr.sin_addr.s_addr = *(int *)gethost->h_addr_list[0];
+    remote_addr.sin_port = htons(port);
 
     run = 1;
     while (run)

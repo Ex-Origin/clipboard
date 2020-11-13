@@ -271,7 +271,7 @@ void check_connection(struct connection *con_lists, int epoll_fd)
     }
 }
 
-int main()
+int main(int argc, char **argv)
 {
     int epoll_fd, server_socket, client_socket, struct_len, event_count, i, index, result;
     struct sockaddr_in server_addr, client_addr;
@@ -282,6 +282,41 @@ int main()
     struct clipboard protocol;
 
     struct connection con_lists[MAX_CONNECTION];
+    int sign_d, sign_p;
+    unsigned int port;
+    char ch;
+
+    port = SERVER_PORT;
+    while ((ch = getopt(argc, argv, "p:h:")) != -1)
+    {
+        switch (ch)
+        {
+        case 'p':
+            sign_p = 1;
+            port = atoi(optarg);
+            break;
+        case 'd':
+            sign_d = 1;
+            break;
+
+        default:
+            printf("Usage: %s [-d][-p port]\n"
+                   "	Command Summary:\n"
+                   "		-d		Start as daemon\n"
+                   "		-p port		Specify port for listening\n",
+                   argv[0]);
+            exit(EXIT_SUCCESS);
+            break;
+        }
+    }
+
+    if (sign_d)
+    {
+        if (fork())
+        {
+            exit(EXIT_SUCCESS);
+        }
+    }
 
     memset(con_lists, 0, sizeof(con_lists));
     for (i = 0; i < MAX_CONNECTION; i++)
@@ -297,7 +332,7 @@ int main()
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(SERVER_PORT);
+    server_addr.sin_port = htons(port);
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
     if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(struct sockaddr_in)) == -1)
