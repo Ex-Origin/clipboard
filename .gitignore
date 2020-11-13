@@ -7,3 +7,6 @@ compile.sh
 *.a
 .gdb_history
 out.bin
+*.tar.gz
+*.zip
+
