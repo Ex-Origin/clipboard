@@ -213,22 +213,22 @@ int main(int argc, char **argv)
     epoll_fd = epoll_create(MAX_EVENT);
 
     srand(time(NULL));
-    for (i = 0; i < KEY_LEN * 2; i++)
-    {
-        aes_key[i] = rand() % 256;
-    }
 
-    memset(local_buf, 0, sizeof(local_buf));
-    memcpy(local_buf, aes_key, KEY_LEN * 2);
     mod_len = crypto_rsa_get_modulus_len(global_public_key_ptr);
-    text_len = sizeof(text);
-    if (0 == crypto_rsa_exptmod(local_buf, mod_len, text, &text_len, global_public_key_ptr, 0))
+    do
     {
-    }
-    else
-    {
-        PRINTF("RSA error!\n");
-    }
+        // Random AES key.
+        for (i = 0; i < KEY_LEN * 2; i++)
+        {
+            aes_key[i] = rand() % 256;
+        }
+        memset(aes_key, 'a', 32);
+
+        memset(local_buf, 0, sizeof(local_buf));
+        memcpy(local_buf, aes_key, KEY_LEN * 2);
+        text_len = sizeof(text);
+
+    } while (crypto_rsa_exptmod(local_buf, mod_len, text, &text_len, global_public_key_ptr, 0) != 0);
 
     remote_addr.sin_family = AF_INET;
 #ifdef SERVER_IP
@@ -240,6 +240,7 @@ int main(int argc, char **argv)
     run = 1;
     while (run)
     {
+
         global_remote_socket = socket(AF_INET, SOCK_STREAM, 0);
 
         connect_to_server(global_remote_socket, &remote_addr, aes_key, text, text_len);

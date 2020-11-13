@@ -9,4 +9,8 @@ compile.sh
 out.bin
 *.tar.gz
 *.zip
-
+test_rsa
+rsa_public_key.pem
+rsa_public_key_pem.h
+rsa_private_key.pem
+rsa_private_key_pem.h
